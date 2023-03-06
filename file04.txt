@@ -1,0 +1,5 @@
+10 read Fred 
+20 read Wilma 
+30 Fred = Fred + + Wilma 
+40 write Fried 
+$$

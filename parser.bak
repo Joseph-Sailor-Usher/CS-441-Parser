@@ -1,0 +1,15 @@
+#lang racket
+
+(define filename "example.txt")
+(define input (open-input-file filename))
+
+(let loop ((line (read-line input)))
+  (cond
+    [(eof-object? line) (close-input-port input)]
+    [else
+      (begin
+        ; process line here
+        (define words (string-split line))
+        (define num-words (length words))
+        (printf "Line ~a contains ~a words.~n" line num-words)
+        (loop (read-line input)))]))

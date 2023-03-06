@@ -1,0 +1,7 @@
+10 read A 
+20 read B 
+30 gosub 400 
+40 if C = 400 then write C 
+50 if C = 0 then goto 1000 
+400 C = A + B : return 
+$$
