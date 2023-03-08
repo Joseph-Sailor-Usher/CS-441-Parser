@@ -42,34 +42,153 @@
     [(eof-object? line)
      (displayln "No $$ at the end of the file.")]
     [(member 'UNKNOWN-SYMBOL tokens)
-     (display (format "Unknown symbol on line: ~a\n" (car line))) #f]
+     (display (format "Unknown operator on line: ~a\n" (car line))) #f]
     [(not (idx? (car line)))
-     (displayln "Missing line number.") #f]
-    [(and (idx? (car line)) (stmt? (cdr line)))
+     (displayln "Missing line number, or line number beginning with zero.") #f]
+    [(and (idx? (car line)) (stmt? (cdr line) (car line)))
      #t]
     [else
      #f]))
-
-;idx		:    nonzero_digit digit* 
-(define (idx? word)
-  (and (not (equal? (string-ref word 0) #\0))
-       (num? word)))
 
 ;linetail		:    stmt | epsilon
 (define (line-tail? input)
   #t)
 
 ;stmt		:    id = expr | if expr then stmt | read id | write expr | goto idx | gosub idx | return
-(define (stmt? input)
-  #t)
+(define (stmt? input line-num)
+  (begin
+    ;(displayln (format "stmt ~a" input))
+    (cond
+      [(and (equal? (length input) 1) (equal? (car input) "return"))
+       #t]
+      [(and (> (length input) 1) (equal? (car input) "read") (id? (cadr input)))
+       #t]
+      [(and (> (length input) 1) (equal? (car input) "goto") (idx? (cadr input)))
+       #t]
+      [(and (> (length input) 1) (equal? (car input) "gosub") (idx? (cadr input)))
+       #t]
+      [(and (equal? (car input) "write") (expr? (cdr input) line-num))
+       #t]
+      [(and (> (length input) 1) (id? (car input)) (equal? (cadr input) "=") (expr? (cdr (cdr input)) line-num))
+       #t]
+      [(and (equal? (car input) "if") (expr-then-stmt? (cdr input) line-num))
+       #t]
+      [else
+       (displayln (format "Improper statement on line ~a" line-num))
+       #f])))
 
 ;expr		:    id etail | num etail | ( expr )
-(define (expr? input)
-  #t)
+(define (expr? input line-num)
+  (begin
+    ;(displayln (format "expr ~a" input))
+    (cond
+      [(empty? (car input))
+       #t]
+      [(and (id? (car input)) (etail? (cdr input) line-num))
+       #t]
+      [(and (num? (car input)) (etail? (cdr input) line-num))
+       #t]
+      [(and (equal? (car input) "(") (expr-then-parens? (cdr input) line-num))
+       #t]
+      [else
+       (displayln (format "Improper expression on line ~a" line-num))
+       #f])))
 
 ;etail		:    + expr | - expr | = expr | epsilon
-(define (etail? input)
-  (displayln input))
+(define (etail? input line-num)
+  (begin
+    ;(displayln (format "etail ~a" input))
+    (cond
+      [(empty? input)
+       #t]
+      [(and (equal? (car input) "+") (expr? (cdr input) line-num))
+       #t]
+      [(and (equal? (car input) "-") (expr? (cdr input) line-num))
+       #t]
+      [(and (equal? (car input) "=") (expr? (cdr input) line-num))
+       #t]
+      [(and (equal? (car input) ":") (expr? (cdr input) line-num))
+       #t]
+      [else
+       (displayln (format "Improper etail on line ~a" line-num))
+       #f])))
+
+;I couldn't figure out another way to do handle this case.
+(define (expr-then-parens? input line-num)
+  (begin
+    ;(displayln (format "expr ~a" input))
+    (cond
+      [(empty? (car input))
+       #t]
+      [(and (id? (car input)) (etail-then-parens? (cdr input) line-num))
+       #t]
+      [(and (num? (car input)) (etail-then-parens? (cdr input) line-num))
+       #t]
+      [(and (equal? (car input) "(") (expr-then-parens? (cdr input) line-num))
+       #t]
+      [else
+       (displayln (format "Improper expression on line ~a" line-num))
+       #f])))
+
+(define (etail-then-parens? input line-num)
+  (begin
+    ;(displayln (format "etail ~a" input))
+    (cond
+      [(empty? input)
+       #t]
+      [(equal? (car input) ")")
+       #t]
+      [(and (equal? (car input) "+") (expr-then-parens? (cdr input) line-num))
+       #t]
+      [(and (equal? (car input) "-") (expr-then-parens? (cdr input) line-num))
+       #t]
+      [(and (equal? (car input) "=") (expr-then-parens? (cdr input) line-num))
+       #t]
+      [(and (equal? (car input) ":") (expr-then-parens? (cdr input) line-num))
+       #t]
+      [else
+       (displayln (format "Improper etail on line ~a" line-num))
+       #f])))
+
+;Again, disgusted with myself for writing three duplicate functions, but it must function.
+(define (expr-then-stmt? input line-num)
+  (begin
+    ;(displayln (format "expr-then-stmt ~a" input))
+    (cond
+      [(empty? (car input))
+       #t]
+      [(and (id? (car input)) (etail-then-stmt? (cdr input) line-num))
+       #t]
+      [(and (num? (car input)) (etail-then-stmt? (cdr input) line-num))
+       #t]
+      [else
+       (displayln (format "Improper expression-then-statement on line ~a" line-num))
+       #f])))
+
+(define (etail-then-stmt? input line-num)
+  (begin
+    ;(displayln (format "etail-then-stmt ~a" input))
+    (cond
+      [(empty? input)
+       #t]
+      [(and (equal? (car input) "+") (expr-then-stmt? (cdr input) line-num))
+       #t]
+      [(and (equal? (car input) "-") (expr-then-stmt? (cdr input) line-num))
+       #t]
+      [(and (equal? (car input) "=") (expr-then-stmt? (cdr input) line-num))
+       #t]
+      [(and (equal? (car input) ":") (expr-then-stmt? (cdr input) line-num))
+       #t]
+      [(and (equal? (car input) "then") (stmt? (cdr input) line-num))
+       #t]
+      [else
+       (displayln (format "Improper etail on line ~a" line-num))
+       #f])))
+
+;idx		:    nonzero_digit digit* 
+(define (idx? word)
+  (and (not (equal? (string-ref word 0) #\0))
+       (num? word)))
 
 ;id		:    [a-zA-Z]+
 (define (id? word)
