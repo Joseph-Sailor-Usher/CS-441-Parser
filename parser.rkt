@@ -1,10 +1,5 @@
 #lang racket
 
-; Split the lines of a file into a list of strings
-(define (split-lines filename)
-  (map (lambda (line) (string-split line))
-       (file->lines filename)))
-
 ; Parse a file
 (define (parse filename)
   (begin
@@ -12,6 +7,16 @@
     (define lines (split-lines filename))
     ; Send the processed lines to be evaluated by our parser functions
     (tokenize-and-parse lines)))
+
+; Split the lines of a file into a list of strings
+(define (split-lines filename)
+  (map (lambda (line) (string-split line))
+       (file->lines filename)))
+
+; Tokenize-and-parse	        :    linelist $$
+(define (tokenize-and-parse input)
+  (and (line-list? input)
+    (equal? (car (last input)) "$$")))
 
 ; Tokenize a list of strings
 (define (tokenize string)
@@ -34,11 +39,6 @@
       [(num? string) 'num]
       [else
        'UNKNOWN-SYMBOL])))
-
-; Tokenize-and-parse	        :    linelist $$
-(define (tokenize-and-parse input)
-  (and (line-list? input)
-    (equal? (car (last input)) "$$")))
 
 ; Linelist		:    line linelist | epsilon
 (define (line-list? input)
