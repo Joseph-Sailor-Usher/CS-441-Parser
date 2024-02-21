@@ -7,12 +7,12 @@
   ; Send the processed lines to be evaluated by our parser functions
   (tokenize-and-parse lines))
 
-; Split the lines of a file into a list of strings
+; Split a file's lines into a list of strings
 (define (split-lines filename)
   (map (lambda (line) (string-split line))
        (file->lines filename)))
 
-; Tokenize-and-parse	        :    linelist $$
+; Tokenize and parse :    linelist $$
 (define (tokenize-and-parse input)
   (and (line-list? input)
     (equal? (car (last input)) "$$")))
@@ -38,7 +38,7 @@
     [else
      'UNKNOWN-SYMBOL]))
 
-; Linelist		:    line linelist | epsilon
+; Linelist		: line linelist | epsilon
 (define (line-list? input)
   (or
    (equal? (car (car input)) "$$")
@@ -46,7 +46,7 @@
     (line? (car input))
     (line-list? (cdr input)))))
 
-; Line		        :    idx stmt linetail* [EOL]
+; Line		        : idx stmt linetail* [EOL]
 (define (line? line)
   (define tokens (append '(idx) (map tokenize (cdr line))))
   ;(displayln tokens)
@@ -61,7 +61,6 @@
      #t]
     [else
      #f]))
-
 
 ; Expression then parenthesis
 (define (expr-then-parens? input line-num)
@@ -133,7 +132,7 @@
      (displayln (format "Improper etail on line ~a" line-num))
      #f]))
 
-; Statement		:    id = expr | if expr then stmt | read id | write expr | goto idx | gosub idx | return
+; Statement :    id = expr | if expr then stmt | read id | write expr | goto idx | gosub idx | return
 (define (stmt? input line-num)
   ;(displayln (format "stmt ~a" input))
   (cond
@@ -155,7 +154,7 @@
      (displayln (format "Improper statement on line ~a" line-num))
      #f]))
 
-;expr		        :    id etail | num etail | ( expr )
+; Expression :    id etail | num etail | ( expr )
 (define (expr? input line-num)
   ;(displayln (format "expr ~a" input))
   (cond
@@ -171,7 +170,7 @@
      (displayln (format "Improper expression on line ~a" line-num))
      #f]))
 
-;etail		        :    + expr | - expr | = expr | epsilon
+; Expresion tail :    + expr | - expr | = expr | epsilon
 (define (etail? input line-num)
   ;(displayln (format "etail ~a" input))
   (cond
@@ -189,30 +188,30 @@
      (displayln (format "Improper etail on line ~a" line-num))
      #f]))
 
-; Index		        :    nonzero_digit digit* 
+; Index :    nonzero_digit digit* 
 (define (idx? word)
   (and (not (equal? (string-ref word 0) #\0))
        (num? word)))
 
-; Id		        :    [a-zA-Z]+
+; Id :    [a-zA-Z]+
 (define (id? word)
   (match word
     [(regexp #rx"^([a-zA-Z]+)$") #t]
     [else #f]))
 
-; Number	        :    numsign digit digit*
+; Number :    numsign digit digit*
 (define (num? word)
   (or (regexp-match? #rx"^[1-9][0-9]*$" word)
       (equal? word "0")))
 
-; Numsign	        :    + | - | epsilon 
+; Numsign :    + | - | epsilon 
 (define (num-sign? character)
   (regexp-match? #rx"[+-]" (string character)))
 
-; Nonzero_digit	        :    1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+; Nonzero_digit :    1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 (define (non-zero-digit? character)
   (regexp-match? #rx"^[1-9]$" (string character)))
 
-; Digit		        :    0 | nonzero_digit
+; Digit :    0 | nonzero_digit
 (define (digit? character)
   (or (char=?  character) #\0) (non-zero-digit? character))
