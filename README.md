@@ -7,7 +7,7 @@ This project implements a parser for a simple imperative programming language us
 - **Parsing Expressions**: Supports identifiers, numbers, and proper use of parentheses for precedence.
 - **Handling Statements**: Includes assignments, conditional statements (`if-then`), input/output operations (`read`, `write`), and control flow changes (`goto`, `gosub`, `return`).
 - **Tokenization**: Recognizes and categorizes keywords, symbols, and operators for parsing.
-- **Line-by-Line Evaluation**: Processes each line of the input file as a separate statement or expression.
+- **Line-by-Line Evaluation**: Processes each line of the input file separately.
 
 ## Prerequisites
 
