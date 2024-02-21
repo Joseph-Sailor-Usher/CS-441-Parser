@@ -1,4 +1,11 @@
 #lang racket
+(define (parse filename)
+  (begin
+    ; Read and split the lines on white spaces into lists of strings
+    (define lines (split-lines filename))
+    ; Send the processed lines to be evaluated by our parser functions
+    (program? lines)))
+
 ; Tokenize a list of strings
 (define (tokenize string)
   (begin
@@ -216,22 +223,3 @@
 (define (split-lines filename)
   (map (lambda (line) (string-split line))
        (file->lines filename)))
-
-(define (parse filename)
-  (begin
-    ; Read and split the lines on white spaces into lists of strings
-    (define lines (split-lines filename))
-    ; Send the processed lines to be evaluated by our parser functions
-    (program? lines)))
-
-#|
-;Original Parser function
-(define (parse filename)
-  (begin
-    ;Read and split the lines on white spaces into lists of strings
-    (define split-lines
-      (map(lambda (line) (string-split line))
-       (file->lines filename)))
-    ;send the processed input file to be evaluated by our parser functions
-    (program? split-lines)))
-|#
